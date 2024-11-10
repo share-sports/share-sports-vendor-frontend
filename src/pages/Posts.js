@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
 import { PencilIcon, Trash2Icon, InfoIcon, PlusIcon } from "lucide-react";
 import { format } from "date-fns";
-import { Link } from "react-router-dom";
 
-// 게시글 관리 컴포넌트
-export default function PostList({ stadiumUuid }) {
+export default function PostList({ stadiumUuid = "example-uuid" }) {
   const [posts, setPosts] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [stadiumUuid]);
-
-  // 게시글 목록 가져오기
+  // 게시글 목록 조회 함수
   const fetchPosts = async () => {
     try {
       const response = await fetch(
-        `http://localhost:9090/api/host/post/list/${stadiumUuid}`,
+        `http://localhost:9090/api/host/post/list?stadiumUuid=${stadiumUuid}&postType=NOTICE`,
         {
           method: "GET",
           headers: {
@@ -26,10 +20,9 @@ export default function PostList({ stadiumUuid }) {
         }
       );
       const data = await response.json();
-      if (data.isSuccess) {
+      if (data.isSuccess && !data.httpStatus.error) {
         setPosts(data.result);
       } else {
-        console.error("Failed to fetch posts:", data.message);
         alert("게시글 목록을 불러오는 데 실패했습니다.");
       }
     } catch (error) {
@@ -38,7 +31,37 @@ export default function PostList({ stadiumUuid }) {
     }
   };
 
-  // 게시글 생성/수정 요청 처리
+  useEffect(() => {
+    fetchPosts();
+  }, [stadiumUuid]);
+
+  // 게시글 삭제 함수
+  const handleDelete = async postUuid => {
+    if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+    try {
+      const response = await fetch(
+        `http://localhost:9090/api/host/post/${postUuid}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (data.isSuccess && !data.httpStatus.error) {
+        alert("게시글이 삭제되었습니다.");
+        setPosts(posts.filter(post => post.postUuid !== postUuid));
+      } else {
+        alert("게시글 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("게시글 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 게시글 생성 또는 수정 함수
   const handleSubmit = async e => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -46,9 +69,11 @@ export default function PostList({ stadiumUuid }) {
       title: formData.get("title"),
       content: formData.get("content"),
       stadiumUuid,
+      postType: "NOTICE",
     };
-
-    const url = "http://localhost:9090/api/host/post";
+    const url = selectedPost
+      ? "http://localhost:9090/api/host/post"
+      : "http://localhost:9090/api/host/post";
     const method = selectedPost ? "PUT" : "POST";
 
     try {
@@ -64,16 +89,14 @@ export default function PostList({ stadiumUuid }) {
         }),
       });
       const data = await response.json();
-
-      if (data.isSuccess) {
+      if (data.isSuccess && !data.httpStatus.error) {
         alert(
           selectedPost ? "게시글이 수정되었습니다." : "게시글이 생성되었습니다."
         );
         setIsDialogOpen(false);
         setSelectedPost(null);
-        fetchPosts(); // 게시글 목록을 다시 불러옴
+        fetchPosts(); // 게시글 목록을 다시 불러옵니다.
       } else {
-        console.error("Failed to save post:", data.message);
         alert("게시글 저장에 실패했습니다.");
       }
     } catch (error) {
@@ -82,42 +105,12 @@ export default function PostList({ stadiumUuid }) {
     }
   };
 
-  // 게시글 삭제 요청 처리
-  const handleDelete = async postUuid => {
-    if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
-
-    try {
-      const response = await fetch(
-        `http://localhost:9090/api/host/post/${postUuid}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
-      const data = await response.json();
-
-      if (data.isSuccess) {
-        alert("게시글이 삭제되었습니다.");
-        setPosts(posts.filter(post => post.postUuid !== postUuid));
-      } else {
-        console.error("Failed to delete post:", data.message);
-        alert("게시글 삭제에 실패했습니다.");
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      alert("게시글 삭제 중 오류가 발생했습니다.");
-    }
-  };
-
   const formatDate = dateString => {
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return "날짜 없음";
-      }
-      return format(date, "yyyy-MM-dd HH:mm");
+      return isNaN(date.getTime())
+        ? "날짜 없음"
+        : format(date, "yyyy-MM-dd HH:mm");
     } catch (error) {
       console.error("Error formatting date:", error);
       return "날짜 없음";
@@ -125,23 +118,21 @@ export default function PostList({ stadiumUuid }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold">게시글 관리</h2>
-          <button
-            className="rounded-full p-2"
-            onClick={() => alert("게시글 관리 정보를 표시합니다.")}
-          >
-            <InfoIcon className="h-4 w-4" />
-          </button>
+          <h2 className="text-2xl font-bold">공지 관리</h2>
+          <InfoIcon
+            className="h-5 w-5 text-gray-500 cursor-pointer"
+            onClick={() => alert("공지 관리 정보를 표시합니다.")}
+          />
         </div>
         <button
           onClick={() => {
             setSelectedPost(null);
             setIsDialogOpen(true);
           }}
-          className="flex items-center bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           <PlusIcon className="mr-2 h-4 w-4" />새 게시글 작성
         </button>
@@ -149,18 +140,23 @@ export default function PostList({ stadiumUuid }) {
 
       <div className="space-y-4">
         {posts.map(post => (
-          <div key={post.postUuid} className="border p-4 rounded-lg">
+          <div
+            key={post.postUuid}
+            className="border p-4 rounded-lg hover:shadow-md transition-shadow"
+          >
             <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <h3 className="text-base font-medium">{post.title}</h3>
+              <div>
+                <h3 className="text-lg font-semibold">{post.title}</h3>
                 <p className="text-sm text-gray-500">
-                  작성일: {formatDate(post.createDate)}
+                  작성자: {post.authorName} | 작성일:{" "}
+                  {formatDate(post.createdDate)}
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
-                  className="p-1 rounded border border-gray-300 hover:bg-gray-200"
-                  onClick={() => {
+                  className="p-1 border border-gray-300 rounded hover:bg-gray-200"
+                  onClick={e => {
+                    e.stopPropagation();
                     setSelectedPost(post);
                     setIsDialogOpen(true);
                   }}
@@ -168,14 +164,20 @@ export default function PostList({ stadiumUuid }) {
                   <PencilIcon className="h-4 w-4" />
                 </button>
                 <button
-                  className="p-1 rounded border border-gray-300 hover:bg-gray-200"
-                  onClick={() => handleDelete(post.postUuid)}
+                  className="p-1 border border-gray-300 rounded hover:bg-gray-200"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleDelete(post.postUuid);
+                  }}
                 >
                   <Trash2Icon className="h-4 w-4" />
                 </button>
               </div>
             </div>
-            <p className="text-sm text-gray-600">{post.content}</p>
+            {/* 본문 내용을 진하게 하고 폰트 크기를 크게 변경 */}
+            <p className="text-lg font-medium text-gray-800 whitespace-pre-wrap mt-2">
+              {post.content}
+            </p>
           </div>
         ))}
       </div>
@@ -188,7 +190,10 @@ export default function PostList({ stadiumUuid }) {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   제목
                 </label>
                 <input
@@ -201,7 +206,10 @@ export default function PostList({ stadiumUuid }) {
                 />
               </div>
               <div>
-                <label htmlFor="content" className="block text-sm font-medium">
+                <label
+                  htmlFor="content"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   내용
                 </label>
                 <textarea

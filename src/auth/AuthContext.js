@@ -7,17 +7,17 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // 앱이 처음 로드될 때 로그인 상태 확인
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem("accessToken");
     setIsLoggedIn(!!token);
   }, []);
 
   const login = token => {
-    localStorage.setItem("jwtToken", token);
+    localStorage.setItem("accessToken", token);
     setIsLoggedIn(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("accessToken");
     setIsLoggedIn(false);
   };
 

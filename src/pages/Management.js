@@ -16,11 +16,14 @@ export default function StadiumManagement() {
 
   const fetchStadiums = async () => {
     try {
+      const token = localStorage.getItem("accessToken");
+      console.log("token: ", token); // 토큰 확인
+
       const response = await fetch(
         "http://localhost:9090/api/host/stadium/list",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

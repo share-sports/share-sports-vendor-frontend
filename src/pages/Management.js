@@ -13,7 +13,7 @@ export default function StadiumManagement() {
   const fetchStadiums = async () => {
     try {
       const response = await fetch(
-        "http://localhost:9090/api/host/stadium/list",
+        "http://chaeseungji.iptime.org:9090/api/host/stadium/list",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -35,7 +35,7 @@ export default function StadiumManagement() {
   const fetchStadiumDetail = async stadiumUuid => {
     try {
       const response = await fetch(
-        `http://localhost:9090/api/host/stadium/detail?stadiumUuid=${stadiumUuid}`,
+        `http://chaeseungji.iptime.org:9090/api/host/stadium/detail?stadiumUuid=${stadiumUuid}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -72,14 +72,17 @@ export default function StadiumManagement() {
     };
     console.log(newStadium);
     try {
-      const response = await fetch("http://localhost:9090/api/host/stadium", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newStadium),
-      });
+      const response = await fetch(
+        "http://chaeseungji.iptime.org:9090/api/host/stadium",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newStadium),
+        }
+      );
       const data = await response.json();
       if (data.isSuccess) {
         alert("구장이 성공적으로 추가되었습니다.");
@@ -97,14 +100,17 @@ export default function StadiumManagement() {
   const handleDeleteStadium = async stadiumUuid => {
     if (!window.confirm("정말로 이 구장을 삭제하시겠습니까?")) return;
     try {
-      const response = await fetch("http://localhost:9090/api/host/stadium", {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ stadiumUuid }),
-      });
+      const response = await fetch(
+        "http://chaeseungji.iptime.org:9090/api/host/stadium",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ stadiumUuid }),
+        }
+      );
       const data = await response.json();
       if (data.isSuccess) {
         alert("구장이 성공적으로 삭제되었습니다.");
@@ -132,14 +138,17 @@ export default function StadiumManagement() {
       stadiumUuid: selectedStadium.stadiumUuid,
     };
     try {
-      const response = await fetch("http://localhost:9090/api/host/stadium", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await fetch(
+        "http://chaeseungji.iptime.org:9090/api/host/stadium",
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
       const data = await response.json();
       if (data.isSuccess) {
         alert("구장 정보가 수정되었습니다.");

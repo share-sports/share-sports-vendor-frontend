@@ -73,16 +73,19 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:9090/api/auth/sign-up", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          birth: new Date(formData.birth).toISOString(),
-        }),
-      });
+      const response = await fetch(
+        "http://chaeseungji.iptime.org:9090/api/auth/sign-up",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            birth: new Date(formData.birth).toISOString(),
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("회원가입에 실패했습니다.");

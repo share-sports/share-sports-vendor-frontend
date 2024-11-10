@@ -16,7 +16,7 @@ export default function PostDetail() {
     const fetchPost = async () => {
       try {
         const response = await fetch(
-          `http://localhost:9090/api/host/post/${postUuid}`,
+          `http://chaeseungji.iptime.org:9090/api/host/post/${postUuid}`,
           {
             method: "GET",
             headers: {
@@ -57,7 +57,7 @@ export default function PostDetail() {
     setIsDeleting(true);
     try {
       const response = await fetch(
-        `http://localhost:9090/api/host/post/${postUuid}`,
+        `http://chaeseungji.iptime.org:9090/api/host/post/${postUuid}`,
         {
           method: "DELETE",
           headers: {

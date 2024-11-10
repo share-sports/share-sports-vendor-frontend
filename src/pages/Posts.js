@@ -11,7 +11,7 @@ export default function PostList({ stadiumUuid = "example-uuid" }) {
   const fetchPosts = async () => {
     try {
       const response = await fetch(
-        `http://localhost:9090/api/host/post/list?stadiumUuid=${stadiumUuid}&postType=NOTICE`,
+        `http://chaeseungji.iptime.org:9090/api/host/post/list?stadiumUuid=${stadiumUuid}&postType=NOTICE`,
         {
           method: "GET",
           headers: {
@@ -40,7 +40,7 @@ export default function PostList({ stadiumUuid = "example-uuid" }) {
     if (!window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
     try {
       const response = await fetch(
-        `http://localhost:9090/api/host/post/${postUuid}`,
+        `http://chaeseungji.iptime.org:9090/api/host/post/${postUuid}`,
         {
           method: "DELETE",
           headers: {
@@ -72,8 +72,8 @@ export default function PostList({ stadiumUuid = "example-uuid" }) {
       postType: "NOTICE",
     };
     const url = selectedPost
-      ? "http://localhost:9090/api/host/post"
-      : "http://localhost:9090/api/host/post";
+      ? "http://chaeseungji.iptime.org:9090/api/host/post"
+      : "http://chaeseungji.iptime.org:9090/api/host/post";
     const method = selectedPost ? "PUT" : "POST";
 
     try {
